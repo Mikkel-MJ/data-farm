@@ -1,7 +1,5 @@
 package Generator
 
-
-
 import scala.reflect.runtime.currentMirror
 import scala.tools.reflect.ToolBox
 import scala.reflect.runtime.universe._
@@ -11,11 +9,9 @@ import java.nio.file.Paths
   * Created by researchuser7 on 2020-03-17.
   */
 
-case class AbstractFlinkJob(jobBody:String, jobName:String, saveExecutionPlan:Boolean=false){
-  var filledBody:String = fillBody()
-  var filledSBT:String = fillSBT()
-
-  def fillBody(): String ={
+case class AbstractFlinkJob(jobBody:String, jobName:String, saveExecutionPlan:Boolean=false) extends AbstractJob{
+ 
+  override def fillBody(): String ={
 //    if (saveExecutionPlan && planOutPath.isEmpty){
 //      println("WARNING - Request to save execution plan but no plan out path has been provided. Execution plan will not be saved!")
 //    }
@@ -25,12 +21,12 @@ case class AbstractFlinkJob(jobBody:String, jobName:String, saveExecutionPlan:Bo
       .replace("//#save_plan#//", if (saveExecutionPlan) AbstractFlinkJob.saveExecPlanCode() else "")
   }
 
-  def fillSBT(): String = {
+  override def fillSBT(): String = {
     AbstractFlinkJob.SBT_TEMPLATE
       .replace("//#job_name#//", this.jobName)
   }
 
-  def createSBTProject(projectPath:String): Unit ={
+  override def createProject(projectPath:String): Unit ={
     val tb = currentMirror.mkToolBox()
     //val parsedTree = tb.parse(filledBody)
     val finalProjectPath = Paths.get(projectPath, jobName).toString
@@ -173,8 +169,5 @@ object AbstractFlinkJob {
      """.stripMargin
 
   def saveExecPlanCode() = s"""saveExecutionPlan(execPlan, execTime, params, env)"""
-
-
-
 
 }

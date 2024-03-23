@@ -216,13 +216,16 @@ case class JobGenerator(abstractPlan: AbstractExecutionPlan, datasetOperatorMana
     operatorCodes.filter(_.nonEmpty)
   }
 
-  def generate(entryOpId: String = "Data Source_0", jobName: String, saveExecutionPlan: Boolean = false): AbstractJob = {
+  def generate(entryOpId: String = "Data Source_0", jobName: String, saveExecutionPlan: Boolean = false, platform: String): AbstractJob = {
     //println(abstractPlan.vertexSet().map(_.opId).mkString(", "))
 
     val operatorCodes = _generate(abstractPlan: AbstractExecutionPlan, entryOpId: String)
     //println(operatorCodes)
-
-    AbstractJob(operatorCodes.mkString("\n"), jobName, saveExecutionPlan = saveExecutionPlan)
+    if(platform == "Wayang") {
+      AbstractWayangJob(operatorCodes.mkString("\n"), jobName, saveExecutionPlan = saveExecutionPlan)
+    } else {
+      AbstractFlinkJob(operatorCodes.mkString("\n"), jobName, saveExecutionPlan = saveExecutionPlan)
+    }
   }
 }
 
@@ -285,7 +288,8 @@ object JobGenerator {
         val generatedJob = jGenerator.generate(
           abstractPlan.getVertexFromId("Data Source_0").opId,
           jobId,
-          saveExecutionPlan = true
+          saveExecutionPlan = true,
+          params("targetPlatform")
         )
 
         println(JobInfoRecorder.currentJobInfo.get)

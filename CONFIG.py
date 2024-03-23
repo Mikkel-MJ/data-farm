@@ -4,7 +4,7 @@ from os.path import join
 
 class CONFIG:
     # PATH TO DATA-FARM PROJECT
-    PROJECT_PATH = "/home/mikkel/projects/data-farm"  # <absolute_path_to_project>
+    PROJECT_PATH = "/home/mikkel/data-farm"  # <absolute_path_to_project>
 
     # PATH TO INPUT DATA
     GENERATED_JOB_INPUT_DATA_PATH = "/data"  # <absolute_path_to_input_data>
@@ -22,7 +22,7 @@ class CONFIG:
     N_VERSIONS = 1
     JOB_SEED = 42  # -1 | 0
     DATA_MANAGER = "TPCH"  # "TPCH" | "IMDB"
-    TARGET_PLATFORM = "Flink"
+    TARGET_PLATFORM = "Wayang"  # "Flink" | "Wayang"
     #################################################################
 
     # DATA GENERATORS HOME
