@@ -27,8 +27,11 @@ trait AbstractDatasetOperatorManager {
 
   val tables: Seq[String]
 
-  def getTableOperatorManager(s: String): AbstractTableOperatorManager
+  var platform : String = "Flink"
 
+  def getTableOperatorManager(s: String,p: String): AbstractTableOperatorManager
+  
+  
 
   val maxAttempts = 100
   val random: Random.type = Random
@@ -44,7 +47,7 @@ trait AbstractDatasetOperatorManager {
     //Get join table field
     var t0_jTableField = t0_OpMan.joinFieldTable(t0_jField)(t0_jTable)
 
-    var t1_OpMan = getTableOperatorManager(t0_jTable)
+    var t1_OpMan = getTableOperatorManager(t0_jTable,platform)
 
     JoinRelation(t0_OpMan, t1_OpMan, t0_jTableField)
   }
@@ -81,7 +84,7 @@ trait AbstractDatasetOperatorManager {
 
     // Init table
     var t0 = getElementBySeed(tables, seed).toString
-    var t0_OpMan = getTableOperatorManager(t0)
+    var t0_OpMan = getTableOperatorManager(t0,platform)
 
     tableSequence = tableSequence :+ t0_OpMan
 
@@ -110,9 +113,9 @@ trait AbstractDatasetOperatorManager {
 }
 
 object AbstractDatasetOperatorManager {
-  def apply(s: String): AbstractDatasetOperatorManager = {
+  def apply(s: String, p: String): AbstractDatasetOperatorManager = {
     if (s == "TPCH")
-      TPCHDatasetOperatorManager
+      new TPCHDatasetOperatorManager(p)
     else if (s == "IMDB")
       IMDBKDatasetOperatorManager
     else

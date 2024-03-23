@@ -12,7 +12,6 @@ import java.nio.file.Paths
   */
 
 case class AbstractJob(jobBody:String, jobName:String, saveExecutionPlan:Boolean=false){
-
   var filledBody:String = fillBody()
   var filledSBT:String = fillSBT()
 
@@ -23,7 +22,6 @@ case class AbstractJob(jobBody:String, jobName:String, saveExecutionPlan:Boolean
     AbstractJob.JOB_TEMPLATE
       .replace("//#job_name#//", this.jobName)
       .replace("//#body#//", this.jobBody)
-      .replace("//#save_plan#//", if (saveExecutionPlan) AbstractJob.saveExecPlanCode() else "")
   }
 
   def fillSBT(): String = {
@@ -32,31 +30,29 @@ case class AbstractJob(jobBody:String, jobName:String, saveExecutionPlan:Boolean
   }
 
   def createSBTProject(projectPath:String): Unit ={
-
     val tb = currentMirror.mkToolBox()
-    val parsedTree = tb.parse(filledBody)
-
+    //val parsedTree = tb.parse(filledBody)
     val finalProjectPath = Paths.get(projectPath, jobName).toString
     println(s"Saving SBT project to $finalProjectPath")
 
-    val srcDirRes = new File(s"$finalProjectPath/src/main/scala").mkdirs()
-    val projectDirRes = new File(s"$finalProjectPath/project").mkdirs()
+    //val srcDirRes = new File(s"$finalProjectPath/src/main/scala").mkdirs()
+    //val projectDirRes = new File(s"$finalProjectPath/project").mkdirs()
 
     //val res = s"mkdir -p $projectPath/src/{main,test}/{java,resources,scala}" !
     //val res1 = s"mkdir $projectPath/lib $projectPath/project $projectPath/target" !
 
-    val jobWriter = new java.io.PrintWriter(s"$finalProjectPath/src/main/scala/$jobName.scala")
-    val buildWriter = new java.io.PrintWriter(s"$finalProjectPath/build.sbt")
-    val pluginsWriter = new java.io.PrintWriter(s"$finalProjectPath/project/plugins.sbt")
+    val jobWriter = new java.io.PrintWriter(s"$projectPath/$jobName.scala")
+   // val buildWriter = new java.io.PrintWriter(s"$finalProjectPath/build.sbt")
+   // val pluginsWriter = new java.io.PrintWriter(s"$finalProjectPath/project/plugins.sbt")
     try {
-      jobWriter.write(showCode(parsedTree))
-      buildWriter.write(filledSBT)
-      pluginsWriter.write("""addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")""")
+      jobWriter.write(filledBody)
+     // buildWriter.write(filledSBT)
+     // pluginsWriter.write("""addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")""")
     }
     finally {
       jobWriter.close()
-      buildWriter.close()
-      pluginsWriter.close()
+      //buildWriter.close()
+      //pluginsWriter.close()
     }
   }
 
@@ -76,6 +72,7 @@ object AbstractJob {
        |val flinkConf = "provided" // "compile" | "provided"
        |
        |val flinkDependencies = Seq(
+  irintln("body: " + jobBody)
        |  "org.apache.flink" %% "flink-scala" % flinkVersion % flinkConf,
        |  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % flinkConf,
        |  "org.apache.flink" % "flink-hadoop-fs" % flinkVersion % "compile"
@@ -93,86 +90,54 @@ object AbstractJob {
 
   val JOB_TEMPLATE: String =
     """
-       |object //#job_name#// {
-       |
-       |  import org.apache.flink.api.scala._
-       |  import org.apache.flink.api.java.io.DiscardingOutputFormat
-       |  import org.apache.flink.api.scala.ExecutionEnvironment
-       |  import org.apache.flink.api.common.operators.Order
-       |  import org.apache.flink.configuration.Configuration
-       |
-       |  import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-       |
-       |  import scala.collection.JavaConverters._
-       |
-       |  val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-       |
-       |  def run(params: Map[String, String]): Unit = {
-       |    val env = if (params.getOrElse("local", "false") == "true") {
-       |      val conf = new Configuration()
-       |      conf.setString("taskmanager.heap.size", params.getOrElse("heap_size", "4G"))
-       |      val lEnv = ExecutionEnvironment.createLocalEnvironment(conf)
-       |      val executionConfig = lEnv.getConfig
-       |      executionConfig.setParallelism(params.getOrElse("parallelism", "4").toInt)
-       |      lEnv
-       |    } else {
-       |      ExecutionEnvironment.getExecutionEnvironment
-       |    }
-       |
-       |    //#body#//
-       |
-       |    val execPlan = env.getExecutionPlan()
-       |    val execTime = if (params.getOrElse("execute", "false") == "true"){
-       |      val execResult = env.execute
-       |      println(StringContext("Runtime execution: ", " ms").s(execResult.getNetRuntime))
-       |      Some(execResult.getNetRuntime)
-       |    } else {
-       |      None
-       |    }
-       |
-       |    //#save_plan#//
-       |  }
-       |
-       |  def main(args: Array[String]): Unit = {
-       |    val params = if (args.length==6){
-       |      Map(
-       |        "dataPath" -> args(0),
-       |        "execPlanOutPath" -> args(1),
-       |        "execute" -> (args(2) == "exec").toString,
-       |        "local" -> (args(3) == "local").toString,
-       |        "heap_size" -> args(4),
-       |        "parallelism"->args(5)
-       |      )
-       |    }
-       |    else {
-       |      throw new Exception("Expected arguments: <data_path> <exec_plan_out_path> <exec|noexec> <local|nolocal> <heap_size> <parallelism>")
-       |    }
-       |    run(params)
-       |  }
-       |
-       |  def saveExecutionPlan(execPlan:String, execTime:Option[Long], params: Map[String, String], env:ExecutionEnvironment): Unit = {
-       |    import java.io.{File, PrintWriter};
-       |    import java.nio.file.Paths;
-       |    val outFilePath = Paths.get(params("execPlanOutPath"), StringContext("", ".json").s(this.getClass.getName))
-       |    val pw = new PrintWriter(new File(outFilePath.toString));
-       |
-       |    val reachExecPlan = "{\n" +
-       |      "\t\"dataPath\": \"" + s"${params("dataPath")}" + "\",\n" +
-       |      "\t\"execPlanOutPath\": \"" + s"${params("execPlanOutPath")}" + "\",\n" +
-       |      "\t\"execute\": \"" + s"${params("execute")}" + "\",\n" +
-       |      "\t\"local\": \"" + s"${params("local")}" + "\",\n" +
-       |      "\t\"heap_size\": \"" + s"${params("heap_size")}" + "\",\n" +
-       |      "\t\"netRunTime\": " + s"${execTime.getOrElse(-1)},\n" +
-       |      "\t\"environmentConfig\": \"" + s"${env.getJavaEnv.getConfiguration.toString}" + "\",\n" +
-       |      "\t\"executionConfig\": \"" + s"${env.getConfig.toString}" + "\",\n" +
-       |      "\t\"executionPlan\": " + s"$execPlan\n" +
-       |      "}"
-       |    pw.write(reachExecPlan)
-       |    pw.close()
-       |  }
-       |
-       |}
-     """.stripMargin
+  | /*
+  | * Licensed to the Apache Software Foundation (ASF) under one
+  | * or more contributor license agreements.  See the NOTICE file
+  | * distributed with this work for additional information
+  | * regarding copyright ownership.  The ASF licenses this file
+  | * to you under the Apache License, Version 2.0 (the
+  | * "License"); you may not use this file except in compliance
+  | * with the License.  You may obtain a copy of the License at
+  | *
+  | *     http://www.apache.org/licenses/LICENSE-2.0
+  | *
+  | * Unless required by applicable law or agreed to in writing, software
+  | * distributed under the License is distributed on an "AS IS" BASIS,
+  | * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  | * See the License for the specific language governing permissions and
+  | * limitations under the License.
+  | */
+  |
+  | package org.apache.wayang.training
+  | import org.apache.wayang.api._
+  | import org.apache.wayang.core.api.{Configuration, WayangContext}
+  | import org.apache.wayang.core.plugin.Plugin
+  | import org.apache.wayang.apps.tpch.data.{Customer, Order, LineItem, Nation, Part, Partsupp, Supplier} 
+  | import org.apache.wayang.core.plugin.Plugin
+  | import java.sql.Date
+  | import org.apache.wayang.apps.util.{ExperimentDescriptor, Parameters, ProfileDBHelper}
+  | import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+  |
+  |object //#job_name#// {
+  |
+  |  def main(args: Array[String]) {
+  |   println("running Job: //#job_name#//")
+  |
+  |   val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+  |   val plugins = Parameters.loadPlugins(args(0))
+  |   val datapath ="file:///var/www/html/data/" 
+  |
+  |   implicit val configuration = new Configuration
+  |   val wayangCtx = new WayangContext(configuration)
+  |   plugins.foreach(wayangCtx.register)
+  |   val planBuilder = new PlanBuilder(wayangCtx)
+  |   .withJobName(s"TPC-H (${this.getClass.getSimpleName})")
+  |
+  |    //#body#//
+  |
+  |   }
+  | }  
+  """.stripMargin
 
   def saveExecPlanCode() = s"""saveExecutionPlan(execPlan, execTime, params, env)"""
 

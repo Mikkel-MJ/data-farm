@@ -168,7 +168,6 @@ case class JobGenerator(abstractPlan: AbstractExecutionPlan, datasetOperatorMana
           tableOpManager = rxOperator.tableOperatorManager.get //update the table manager for the branch
 
           val opJoinCode = getOpCode(op: AbstractOperator) //secondOp=Some(rxOperator)
-
           opCode = (opBeforeJoinCodes :+ opJoinCode).mkString("\n")
         }
 
@@ -237,7 +236,8 @@ object JobGenerator {
         "dataManager" -> args(2),
         "abstractPlansSource" -> args(3),
         "genJobsDest" -> args(4),
-        "jobSeed" -> args.lift(5).getOrElse("-1")
+        "jobSeed" -> args.lift(5).getOrElse("-1"),
+        "targetPlatform" -> args(6)
 
       )
     else
@@ -267,7 +267,7 @@ object JobGenerator {
       val i = Paths.get(absPlanPath).getFileName.toString.replace(".json", "").split("_").last.toInt
 
       val abstractPlan = AbstractExecutionPlan.parseExecPlan(Paths.get(absPlanPath).toString)
-      val tpchDatasetOperatorManager = AbstractDatasetOperatorManager(params("dataManager"))
+      val tpchDatasetOperatorManager = AbstractDatasetOperatorManager(params("dataManager"),params("targetPlatform"))
 
       for (j <- 0 until params("nVersions").toInt) {
 
@@ -289,7 +289,7 @@ object JobGenerator {
         )
 
         println(JobInfoRecorder.currentJobInfo.get)
-        println(JobInfoRecorder.currentJobInfo.get.toJson)
+        //println(JobInfoRecorder.currentJobInfo.get.toJson)
         JobInfoRecorder.closeJobRecorder()
 
         generatedJob.createSBTProject(params("genJobsDest"))

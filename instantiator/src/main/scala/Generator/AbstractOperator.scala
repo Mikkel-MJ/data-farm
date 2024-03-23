@@ -66,6 +66,7 @@ case class AbstractOperator(
   }
 
   def mapCode(inVarName: String, complexity: Int = 0): String = {
+    println("VARNAME: " + inVarName + "   " + this.getVariableName())
     val c = tableOperatorManager.get.mapCode(inVarName, this.getVariableName(), complexity)
     if (JobInfoRecorder.currentJobInfo.isDefined){
       JobInfoRecorder.currentJobInfo.get.record(

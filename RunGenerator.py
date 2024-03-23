@@ -3,19 +3,25 @@ import os
 
 
 def generate_abstract_plans():
-    print(f"|--> Generating '{CONFIG.N_JOBS}' abstract plans in '{CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER}'")
+    print(
+        f"|--> Generating '{CONFIG.N_JOBS}' abstract plans in '{CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER}'"
+    )
     print()
 
-    os.system(f'cd {CONFIG.ABSTRACT_PLAN_GENERATOR}; '
-              f'python3 NewAbstractExecutionPlanAnalyzer.py {CONFIG.N_JOBS} {CONFIG.ORIG_EXEC_PLAN_FOLDER} {CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER}')
+    os.system(
+        f"cd {CONFIG.ABSTRACT_PLAN_GENERATOR}; "
+        f"python3 NewAbstractExecutionPlanAnalyzer.py {CONFIG.N_JOBS} {CONFIG.ORIG_EXEC_PLAN_FOLDER} {CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER}"
+    )
 
 
 def generate_jobs():
     print(f"|--> Generating '{CONFIG.N_JOBS}' jobs in '{CONFIG.GENERATED_JOB_FOLDER}'")
     print()
 
-    os.system(f'cd {CONFIG.JOB_GENERATOR}; '
-              f'sbt "runMain Generator.JobGenerator {CONFIG.N_JOBS} {CONFIG.N_VERSIONS} {CONFIG.DATA_MANAGER} {CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER} {CONFIG.GENERATED_JOB_FOLDER} {CONFIG.JOB_SEED}"')
+    os.system(
+        f"cd {CONFIG.JOB_GENERATOR}; "
+        f'sbt "runMain Generator.JobGenerator {CONFIG.N_JOBS} {CONFIG.N_VERSIONS} {CONFIG.DATA_MANAGER} {CONFIG.GENERATED_ABSTRACT_EXECUTION_PLAN_FOLDER} {CONFIG.GENERATED_JOB_FOLDER} {CONFIG.JOB_SEED} {CONFIG.TARGET_PLATFORM}"'
+    )
 
 
 def create_project_folders():
@@ -36,8 +42,7 @@ def create_project_folders():
             print(f"|--> Skip project folder: {pj_f}")
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     print("|Init project")
     create_project_folders()
 

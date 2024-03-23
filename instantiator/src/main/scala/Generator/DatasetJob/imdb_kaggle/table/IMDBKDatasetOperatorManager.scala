@@ -17,7 +17,7 @@ object IMDBKDatasetOperatorManager extends AbstractDatasetOperatorManager {
     "title.principals"
   )
 
-  def getTableOperatorManager(s: String): AbstractTableOperatorManager = s match {
+  def getTableOperatorManager(s: String, p: String): AbstractTableOperatorManager = s match {
     case "name.basics" => NameBasicsOperatorManager()
     case "title.akas" => TitleAkasOperatorManager()
     case "title.basics" => TitleBasicsOperatorManager()
