@@ -100,23 +100,23 @@ object AbstractWayangJob {
   |
   |object //#job_name#// {
   |
-  |  def main(args: Array[String]) {
-  |   println("running Job: //#job_name#//")
+  |def buildPlan(args: Array[String]): DataQuanta[Any] {
+  | println("running Job: //#job_name#//")
   |
-  |   val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-  |   val plugins = Parameters.loadPlugins(args(0))
-  |   val datapath ="file:///var/www/html/data/" 
+  | val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+  | val plugins = Parameters.loadPlugins(args(0))
+  | val datapath ="file:///var/www/html/data/" 
   |
-  |   implicit val configuration = new Configuration
-  |   val wayangCtx = new WayangContext(configuration)
-  |   plugins.foreach(wayangCtx.register)
-  |   val planBuilder = new PlanBuilder(wayangCtx)
-  |   .withJobName(s"TPC-H (${this.getClass.getSimpleName})")
+  | implicit val configuration = new Configuration
+  | val wayangCtx = new WayangContext(configuration)
+  | plugins.foreach(wayangCtx.register)
+  | val planBuilder = new PlanBuilder(wayangCtx)
+  | .withJobName(s"TPC-H (${this.getClass.getSimpleName})")
   |
-  |    //#body#//
+  |   //#body#//
   |
-  |   }
-  | }  
+  | }
+  |}  
   """.stripMargin
 
   def saveExecPlanCode() = s"""saveExecutionPlan(execPlan, execTime, params, env)"""

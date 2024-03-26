@@ -147,7 +147,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def sinkCode(inVarName: String, outVarName: String): String = {
     s"""
-       |val $outVarName = $inVarName.collect()
+      | return $inVarName
       """.stripMargin
   }
 

@@ -296,7 +296,7 @@ object JobGenerator {
         //println(JobInfoRecorder.currentJobInfo.get.toJson)
         JobInfoRecorder.closeJobRecorder()
 
-        generatedJob.createSBTProject(params("genJobsDest"))
+        generatedJob.createProject(params("genJobsDest"))
       }
 
 
