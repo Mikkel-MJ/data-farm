@@ -67,8 +67,8 @@ case class OrdersOperatorManager() extends AbstractTableOperatorManager {
     field match {
 
       case "ORDERDATE" =>
-        filterField = fields(field) + ".getTime"
-        filterValue = s"""dateFormatter.parseDateTime("${getElementBySeed(filterFieldValue(field)("values"), valueSeed)}").getMillis"""
+        filterField = fields(field)
+        filterValue = s"""CsvUtils.parseDate("${getElementBySeed(filterFieldValue(field)("values"), valueSeed)}")"""
         filterOp = "<="
 
       case "TOTALPRICE" =>

@@ -80,8 +80,8 @@ case class LineitemOperatorManager() extends AbstractTableOperatorManager {
 
     field match {
       case "SHIPDATE" =>
-        filterField = fields(field) + ".getTime"
-        filterValue = s"""dateFormatter.parseDateTime("${getElementBySeed(filterFieldValue(field)("values"), valueSeed)}").getMillis"""
+        filterField = fields(field)
+        filterValue = s"""CsvUtils.parseDate("${getElementBySeed(filterFieldValue(field)("values"), valueSeed)}")"""
         filterOp = "<="
 
       case "QUANTITY" =>

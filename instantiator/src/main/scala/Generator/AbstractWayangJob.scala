@@ -97,10 +97,11 @@ object AbstractWayangJob {
   | import java.sql.Date
   | import org.apache.wayang.apps.util.{ExperimentDescriptor, Parameters, ProfileDBHelper}
   | import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+  | import org.apache.wayang.apps.tpch.CsvUtils
   |
   |object //#job_name#// {
   |
-  |def buildPlan(args: Array[String]): DataQuanta[Any] {
+  |def buildPlan(args: Array[String]): DataQuanta[_] = {
   | println("running Job: //#job_name#//")
   |
   | val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
