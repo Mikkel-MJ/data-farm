@@ -6,7 +6,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 
 import matplotlib.pyplot as plt
 
-from generator_labeler.Generator.Node import NodeOp
+from Generator.Node import NodeOp
 
 
 def load_exec_plans(plan_folder):
@@ -20,7 +20,9 @@ def load_exec_plans(plan_folder):
         ep_id = ep_file.replace(".json", "")
 
         with open(os.path.join(plan_folder, ep_file)) as f:
-            ep_str = " ".join(f.readlines()).replace('"UTF-16LE"', r'\"UTF-16LE\"') # To fix issues with the json produced by flink
+            ep_str = " ".join(f.readlines()).replace(
+                '"UTF-16LE"', r"\"UTF-16LE\""
+            )  # To fix issues with the json produced by flink
 
         ep_json = json.loads(ep_str)
         exec_plans.append((ep_id, data_size_id, ep_json))
@@ -28,7 +30,6 @@ def load_exec_plans(plan_folder):
 
 
 def compute_flink_graph_from_exec_plan(exec_plan, G, include_cycles=True):
-
     for n in exec_plan["nodes"]:
         # check if there is an iteration
         if n["type"] == "bulk_iteration":
@@ -44,7 +45,9 @@ def compute_flink_graph_from_exec_plan(exec_plan, G, include_cycles=True):
                             G.add_edge(p["id"], step_function["id"], **p, color="black")
 
                 # add iteration edge
-                G.add_edge(n["next_partial_solution"], n["partial_solution"], color="gray")
+                G.add_edge(
+                    n["next_partial_solution"], n["partial_solution"], color="gray"
+                )
 
                 # add return from iteration edge
                 G.add_edge(n["next_partial_solution"], n["id"], color="purple")
@@ -69,7 +72,7 @@ def compute_graph_from_plan(exec_plan, include_cycles=True):
     G = nx.DiGraph()
 
     G.graph["plan_id"] = f"{plan_id}_{data_size_id}"
-    #print(G.graph["plan_id"])
+    # print(G.graph["plan_id"])
 
     try:
         G.graph["dataPath"] = ex_plan["dataPath"]
@@ -82,7 +85,9 @@ def compute_graph_from_plan(exec_plan, include_cycles=True):
         G.graph["execute"] = None
         G.graph["netRunTime"] = None
 
-    G = compute_flink_graph_from_exec_plan(ex_plan["executionPlan"], G, include_cycles=include_cycles)
+    G = compute_flink_graph_from_exec_plan(
+        ex_plan["executionPlan"], G, include_cycles=include_cycles
+    )
 
     return G
 
@@ -97,31 +102,40 @@ def compute_graphs_from_plans(exec_plans, include_cycles=True):
 
 
 def show_exec_plan_graph(pg):
-    fig, ax = plt.subplots(1,1, figsize=(8,5), dpi=110)
-    nx.draw(pg, graphviz_layout(pg, prog='dot'), with_labels=True,
-            labels = {n[0]:f"{n[0]}_{n[1]['pact']}" for n in pg.nodes.data()},
-            node_color=[n[1]["color"] for n in pg.nodes.data()],
-            edge_color=[e[2]["color"] for e in pg.edges.data()],
-            ax=ax
-            )
+    fig, ax = plt.subplots(1, 1, figsize=(8, 5), dpi=110)
+    nx.draw(
+        pg,
+        graphviz_layout(pg, prog="dot"),
+        with_labels=True,
+        labels={n[0]: f"{n[0]}_{n[1]['pact']}" for n in pg.nodes.data()},
+        node_color=[n[1]["color"] for n in pg.nodes.data()],
+        edge_color=[e[2]["color"] for e in pg.edges.data()],
+        ax=ax,
+    )
     ax.set_title(pg.graph["plan_id"])
     plt.show()
     plt.close()
 
+
 def _show_generated_exec_plan_graph(pg):
     fig, ax = plt.subplots(1, 1, figsize=(8, 5), dpi=110)
-    nx.draw(pg, graphviz_layout(pg, prog='dot'), with_labels=True,
-            labels={n[0]: f"{n[0]}" for n in pg.nodes.data()},
-            node_color=[NodeOp.get_operator_color(n[1]) for n in pg.nodes.data()],
-            ax=ax
-            )
+    nx.draw(
+        pg,
+        graphviz_layout(pg, prog="dot"),
+        with_labels=True,
+        labels={n[0]: f"{n[0]}" for n in pg.nodes.data()},
+        node_color=[NodeOp.get_operator_color(n[1]) for n in pg.nodes.data()],
+        ax=ax,
+    )
     ax.set_title(pg.graph["plan_id"])
     return ax
+
 
 def show_generated_exec_plan_graph(pg):
     ax = _show_generated_exec_plan_graph(pg)
     plt.show()
     plt.close()
+
 
 def save_generated_exec_plan_graph(pg, dest_folder, save_graph_plot=True):
     data1 = nx.json_graph.node_link_data(pg)
@@ -132,6 +146,6 @@ def save_generated_exec_plan_graph(pg, dest_folder, save_graph_plot=True):
 
     if save_graph_plot:
         ax = _show_generated_exec_plan_graph(pg)
-        #ax.set_title(f'{pg.graph["plan_id"]}')
+        # ax.set_title(f'{pg.graph["plan_id"]}')
         plt.savefig(os.path.join(dest_folder, f'{pg.graph["plan_id"]}.pdf'))
         plt.close()

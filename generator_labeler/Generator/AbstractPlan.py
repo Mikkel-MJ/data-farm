@@ -6,13 +6,12 @@ import networkx as nx
 from networkx.algorithms.dag import dag_longest_path_length
 import pandas as pd
 
-from generator_labeler.FeatureExtraction import FeatureExtraction
-from generator_labeler.Generator.Node import NodeOp
+from FeatureExtraction import FeatureExtraction
+from Generator.Node import NodeOp
+
 
 class AbstactPlanGeneratorModel:
-
-    def __init__(self, max_depth = -1, max_joins = -1, seed="rand"):
-
+    def __init__(self, max_depth=-1, max_joins=-1, seed="rand"):
         self.max_depth = max_depth
         self.max_joins = max_joins
         self.seed = seed
@@ -33,23 +32,39 @@ class AbstactPlanGeneratorModel:
             raise Exception(f"Uknown seed: {self.seed}")
 
     def fit(self, exec_plans_graph):
-        reach_nodes_table = FeatureExtraction.get_plan_tables_from_plans(exec_plans_graph)
+        reach_nodes_table = FeatureExtraction.get_plan_tables_from_plans(
+            exec_plans_graph
+        )
 
-        self.n_children_mapping = self.get_n_relatives_dist(reach_nodes_table, relationship="children")
-        #print(self.n_children_mapping)
-        self.n_parents_mapping = self.get_n_relatives_dist(reach_nodes_table, relationship="parents")
-        #print(self.n_parents_mapping)
+        self.n_children_mapping = self.get_n_relatives_dist(
+            reach_nodes_table, relationship="children"
+        )
+        # print(self.n_children_mapping)
+        self.n_parents_mapping = self.get_n_relatives_dist(
+            reach_nodes_table, relationship="parents"
+        )
+        # print(self.n_parents_mapping)
 
-        expanded_reach_nodes_table = FeatureExtraction.explode_multi_in_out_nodes(reach_nodes_table)
+        expanded_reach_nodes_table = FeatureExtraction.explode_multi_in_out_nodes(
+            reach_nodes_table
+        )
 
-        self.children_transition_matrix = self.compute_transition_matrix(expanded_reach_nodes_table, relationship="children", g_pact_exp=True)
-        self.parent_transition_matrix = self.compute_transition_matrix(expanded_reach_nodes_table, relationship="parents", g_pact_exp=True)
+        self.children_transition_matrix = self.compute_transition_matrix(
+            expanded_reach_nodes_table, relationship="children", g_pact_exp=True
+        )
+        self.parent_transition_matrix = self.compute_transition_matrix(
+            expanded_reach_nodes_table, relationship="parents", g_pact_exp=True
+        )
 
-        path_lengths = np.array([dag_longest_path_length(pg) for pg in exec_plans_graph])
+        path_lengths = np.array(
+            [dag_longest_path_length(pg) for pg in exec_plans_graph]
+        )
 
-        self.longest_path_length_dist = np.quantile(path_lengths, q=np.arange(0.01, 1.0, 0.01), interpolation="higher")
-        #[0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
-        #print(self.longest_path_length_dist)
+        self.longest_path_length_dist = np.quantile(
+            path_lengths, q=np.arange(0.01, 1.0, 0.01), interpolation="higher"
+        )
+        # [0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
+        # print(self.longest_path_length_dist)
 
         return self
 
@@ -57,11 +72,17 @@ class AbstactPlanGeneratorModel:
         generated_plans = []
 
         for i in range(n):
-            abs_generator = AbstractPlanGenerator(self.children_transition_matrix,
-                                                  self.parent_transition_matrix,
-                                                  seed=i if not rand_seed else "rand")
+            abs_generator = AbstractPlanGenerator(
+                self.children_transition_matrix,
+                self.parent_transition_matrix,
+                seed=i if not rand_seed else "rand",
+            )
 
-            m_depth = self.max_depth if self.max_depth != -1 else random.choice(self.longest_path_length_dist)
+            m_depth = (
+                self.max_depth
+                if self.max_depth != -1
+                else random.choice(self.longest_path_length_dist)
+            )
             m_joins = self.max_joins
 
             G = abs_generator.generate(m_depth, m_joins)
@@ -70,7 +91,9 @@ class AbstactPlanGeneratorModel:
 
         return generated_plans
 
-    def compute_transition_matrix(self, nodes_table, relationship="children", g_pact_exp=True):
+    def compute_transition_matrix(
+        self, nodes_table, relationship="children", g_pact_exp=True
+    ):
         """
         :param nodes_table:
         :param relationship:
@@ -82,7 +105,9 @@ class AbstactPlanGeneratorModel:
 
         dists = []
         for g_p in nodes_table["g_pact"].unique():
-            v_c = nodes_table.loc[(nodes_table["g_pact"] == g_p), g_pact_exp_field].value_counts()
+            v_c = nodes_table.loc[
+                (nodes_table["g_pact"] == g_p), g_pact_exp_field
+            ].value_counts()
             norm_v_c = v_c / v_c.sum()
             norm_v_c.name = g_p
             dists.append(norm_v_c)
@@ -91,17 +116,24 @@ class AbstactPlanGeneratorModel:
         transotion_matrix = transotion_matrix.sort_index(axis=0).sort_index(axis=1)
         transotion_matrix = transotion_matrix.fillna(0.0)
 
-        assert (transotion_matrix.shape[0] == transotion_matrix.shape[1])
-        assert (transotion_matrix.sum(axis=1).sum() == transotion_matrix.shape[0])
+        assert transotion_matrix.shape[0] == transotion_matrix.shape[1]
+        assert transotion_matrix.sum(axis=1).sum() == transotion_matrix.shape[0]
 
         return transotion_matrix
 
     def get_n_relatives_dist(self, nodes_table, relationship="children"):
-        n_children_dist = nodes_table.loc[:, ["g_pact"] + list(NodeOp.FIELDS[relationship].values())] \
-            .set_index("g_pact") \
-            .sum(axis=1) \
-            .groupby(level=0).apply(
-            lambda x: np.quantile(np.array(x), q=np.arange(0.01, 1.0, 0.01), interpolation="lower")).to_dict()
+        n_children_dist = (
+            nodes_table.loc[:, ["g_pact"] + list(NodeOp.FIELDS[relationship].values())]
+            .set_index("g_pact")
+            .sum(axis=1)
+            .groupby(level=0)
+            .apply(
+                lambda x: np.quantile(
+                    np.array(x), q=np.arange(0.01, 1.0, 0.01), interpolation="lower"
+                )
+            )
+            .to_dict()
+        )
 
         return n_children_dist
 
@@ -110,7 +142,9 @@ class AbstractPlanGenerator:
     ALPHA_CODE = "abcdefghijklmnopqrstuvwxyz"
     branch_count = 0
 
-    def __init__(self, children_transition_matrix, parent_transition_matrix, seed="rand"):
+    def __init__(
+        self, children_transition_matrix, parent_transition_matrix, seed="rand"
+    ):
         self.node_count = 0
         self.join_count = 0
         self.abstract_G = nx.DiGraph()
@@ -125,8 +159,12 @@ class AbstractPlanGenerator:
         else:
             raise Exception(f"Uknown seed: {seed}")
 
-    def get_next_node_pact(self, list_of_candidates, number_of_items_to_pick, probability_distribution):
-        next_node_pact = random.choice(list_of_candidates, number_of_items_to_pick, p=probability_distribution)[0]
+    def get_next_node_pact(
+        self, list_of_candidates, number_of_items_to_pick, probability_distribution
+    ):
+        next_node_pact = random.choice(
+            list_of_candidates, number_of_items_to_pick, p=probability_distribution
+        )[0]
         return next_node_pact
 
     def get_node_children_candidates(self, node):
@@ -158,7 +196,6 @@ class AbstractPlanGenerator:
         self.add_edge(current_node, next_node, reverse=reverse)
 
     def backward_join_branch_generation(self, join_node, max_depth):
-
         current_node = join_node
         next_node = None
 
@@ -169,7 +206,9 @@ class AbstractPlanGenerator:
             # Avoid Joins in backward branches starting from a Join
             next_node_pact = "Join"
             while "Join" in next_node_pact:
-                next_node_pact = self.get_next_node_pact(candidates, number_of_items_to_pick, proba_dist)
+                next_node_pact = self.get_next_node_pact(
+                    candidates, number_of_items_to_pick, proba_dist
+                )
 
             next_node = self.create_node(next_node_pact)
             self.update_plan(current_node, next_node, reverse=True)
@@ -204,13 +243,17 @@ class AbstractPlanGenerator:
 
         # Foreward main branch generation
         for i in range(max_depth):
-            next_node_pact = self.get_next_node_pact(candidates, number_of_items_to_pick, proba_dist)
+            next_node_pact = self.get_next_node_pact(
+                candidates, number_of_items_to_pick, proba_dist
+            )
 
             if max_joins > -1:
                 # If join count is over th, change the node
                 if ("Join" in next_node_pact) and (self.join_count >= max_joins):
                     while "Join" in next_node_pact:
-                        next_node_pact = self.get_next_node_pact(candidates, number_of_items_to_pick, proba_dist)
+                        next_node_pact = self.get_next_node_pact(
+                            candidates, number_of_items_to_pick, proba_dist
+                        )
                 # Else increase the counter
                 elif "Join" in next_node_pact:
                     self.join_count += 1
@@ -229,7 +272,7 @@ class AbstractPlanGenerator:
             number_of_items_to_pick = current_node.n_children
 
             if "Join" in current_node.pact:
-                self.backward_join_branch_generation(current_node, int(max_depth/2))
+                self.backward_join_branch_generation(current_node, int(max_depth / 2))
 
             # check early exit status
             if "Data Sink" in current_node.pact:
