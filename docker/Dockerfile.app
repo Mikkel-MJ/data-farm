@@ -13,6 +13,10 @@ RUN apt update && apt-get install -y \
     openssl \
     python \
     pip \
+    python3-dev \
+    graphviz \
+    libgraphviz-dev \
+    pkg-config \
     python3.8-venv
 
 # Install Scala kernel

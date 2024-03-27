@@ -1,0 +1,1 @@
+{"directed": true, "multigraph": false, "graph": {"plan_id": "plan_10"}, "nodes": [{"pact": "Data Source", "color": "green", "id": "Data Source_0"}, {"pact": "Map", "color": "lightblue", "id": "Map_1"}, {"pact": "Data Sink", "color": "green", "id": "Data Sink_2"}], "links": [{"source": "Data Source_0", "target": "Map_1"}, {"source": "Map_1", "target": "Data Sink_2"}]}
