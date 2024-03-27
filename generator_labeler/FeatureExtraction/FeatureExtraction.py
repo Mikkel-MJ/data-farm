@@ -1,22 +1,23 @@
-from generator_labeler.Generator.Node import NodeOp
+from Generator.Node import NodeOp
 
 import pandas as pd
 
 
 def explode_multi_in_out_nodes(reach_nodes_table):
     exp_reach_nodes_list = []
-    for k,v in reach_nodes_table.iterrows():
+    for k, v in reach_nodes_table.iterrows():
         p_g_pacts = v["p_g_pact"].split(",")
         c_g_pacts = v["c_g_pact"].split(",")
         for p_g_p in p_g_pacts:
             for c_g_p in c_g_pacts:
-                #print("->", p_g_p,",", c_g_p)
+                # print("->", p_g_p,",", c_g_p)
                 v2 = v.copy()
                 v2["p_g_pact_exp"] = p_g_p.strip()
                 v2["c_g_pact_exp"] = c_g_p.strip()
                 exp_reach_nodes_list.append(v2)
-        #print("-----")
+        # print("-----")
     return pd.concat(exp_reach_nodes_list, axis=1, ignore_index=True).T
+
 
 def get_g_pact(pact):
     g_pact = ""
@@ -70,7 +71,9 @@ def enrich_plan_table(o_nodes_df, p_G, verbose=False):
                 if p_pact in NodeOp.OPERATORS[o]:
                     nodes_df.loc[idx, NodeOp.FIELDS["parents"][o]] += 1
 
-        nodes_df.loc[idx, NodeOp.FIELDS["Parent Grouped Pact"]] = ", ".join(sorted(p_g_pacts))
+        nodes_df.loc[idx, NodeOp.FIELDS["Parent Grouped Pact"]] = ", ".join(
+            sorted(p_g_pacts)
+        )
         print("|") if verbose else None
 
         # For each children
@@ -88,7 +91,9 @@ def enrich_plan_table(o_nodes_df, p_G, verbose=False):
                 if c_pact in NodeOp.OPERATORS[o]:
                     nodes_df.loc[idx, NodeOp.FIELDS["children"][o]] += 1
 
-        nodes_df.loc[idx, NodeOp.FIELDS["Children Grouped Pact"]] = ", ".join(sorted(c_g_pacts))
+        nodes_df.loc[idx, NodeOp.FIELDS["Children Grouped Pact"]] = ", ".join(
+            sorted(c_g_pacts)
+        )
         print() if verbose else None
 
     return nodes_df
@@ -99,7 +104,9 @@ def get_plan_table(p_G, verbose=False):
     nodes_df = pd.DataFrame([n[1] for n in list(p_G.nodes.data())])
     # display(nodes_df)
     try:
-        nodes_df = nodes_df.loc[:, ["id", "type", "pact", "color", "predecessors", "driver_strategy"]]
+        nodes_df = nodes_df.loc[
+            :, ["id", "type", "pact", "color", "predecessors", "driver_strategy"]
+        ]
     except:
         nodes_df = nodes_df.loc[:, ["id", "type", "pact", "color", "predecessors"]]
         nodes_df["driver_strategy"] = None
@@ -113,5 +120,3 @@ def get_plan_tables_from_plans(plan_graphs, verbose=False):
         p_tabs.append(p_tab)
 
     return pd.concat(p_tabs, ignore_index=True)
-
-
