@@ -9,6 +9,8 @@ import Generator.DatasetJob.utils.getElementBySeed
 case class NationOperatorManager() extends AbstractTableOperatorManager {
 
   override val tableName: String = "nation"
+  
+  override val wayangName: String = "Nation"
 
   //override val tableCardinality: Int = 25
 

@@ -10,6 +10,8 @@ case class CustomerOperatorManager() extends AbstractTableOperatorManager {
 
   override val tableName: String = "customer"
 
+  override val wayangName: String = "Customer"
+
   //override val tableCardinality: Int = 150000
 
   override val typeSchema: String = "(Int, String, String, Int, String, Float, String, String)"

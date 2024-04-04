@@ -11,7 +11,9 @@ import Generator.DatasetJob.utils.getElementBySeed
   */
 case class OrdersOperatorManager() extends AbstractTableOperatorManager {
 
-  override val tableName: String = "order"
+  override val tableName: String = "orders"
+
+  override val wayangName: String = "Order"
 
   //override val tableCardinality: Int = 1500000
 

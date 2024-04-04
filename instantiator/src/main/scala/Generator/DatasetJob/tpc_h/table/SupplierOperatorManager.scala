@@ -11,6 +11,8 @@ case class SupplierOperatorManager() extends AbstractTableOperatorManager{
 
   override val tableName: String = "supplier"
 
+  override val wayangName: String = "Supplier"
+
   //override val tableCardinality: Int = 10000
 
   override val typeSchema: String = "(Int, String, String, Int, String, Float, String)"

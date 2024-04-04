@@ -8,6 +8,7 @@ import Generator.DatasetJob.utils.getElementBySeed
   */
 case class TitleRatingsOperatorManager() extends AbstractTableOperatorManager {
   override val tableName: String = "title.ratings"
+  override val wayangName: String = "Not Implemented"
   override val typeSchema: String = "(String, Float, Int)"
   override val fields: Map[String, String] = Map(
     "titleId" -> "1",

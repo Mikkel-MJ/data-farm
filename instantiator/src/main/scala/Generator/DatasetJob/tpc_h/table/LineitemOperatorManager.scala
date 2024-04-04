@@ -12,7 +12,9 @@ import Generator.DatasetJob.utils.getElementBySeed
 
 case class LineitemOperatorManager() extends AbstractTableOperatorManager {
 
-  val tableName = "lineItem"
+  val tableName = "lineitem"
+
+  override val wayangName = "LineItem"
 
   //override val tableCardinality: Int = 6001215
 

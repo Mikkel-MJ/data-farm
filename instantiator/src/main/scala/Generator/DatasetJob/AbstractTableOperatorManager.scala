@@ -10,6 +10,8 @@ trait AbstractTableOperatorManager {
 
   val tableName: String
 
+  val wayangName: String
+
   //val tableCardinality: Int
 
   val typeSchema: String
