@@ -98,8 +98,9 @@ object AbstractWayangJob {
   | import org.apache.wayang.apps.util.{ExperimentDescriptor, Parameters, ProfileDBHelper}
   | import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
   | import org.apache.wayang.apps.tpch.CsvUtils
+  | import org.apache.wayang.ml.training.GeneratableJob
   |
-  |object //#job_name#// {
+  | class //#job_name#// extends GeneratableJob {
   |
   |def buildPlan(args: Array[String]): DataQuanta[_] = {
   | println("running Job: //#job_name#//")
