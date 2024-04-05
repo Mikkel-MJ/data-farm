@@ -88,7 +88,8 @@ object AbstractWayangJob {
   | * limitations under the License.
   | */
   |
-  | package org.apache.wayang.training
+  | package org.apache.wayang.ml.generatables
+  |
   | import org.apache.wayang.api._
   | import org.apache.wayang.core.api.{Configuration, WayangContext}
   | import org.apache.wayang.core.plugin.Plugin

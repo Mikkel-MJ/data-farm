@@ -27,7 +27,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
   override def buildDataSourceCode(schema: String, tableName: String, outVarName: String, delimiter:String = "|"): String = {
     s"""
     | val $outVarName = planBuilder
-    | .readTextFile(datapath + "$wayangName")
+    | .readTextFile(datapath + "$tableName")
     | .withName("Read $wayangName")
     | .map($wayangName.parseCsv)
     | .map($wayangName.toTuple)
@@ -147,7 +147,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def sinkCode(inVarName: String, outVarName: String): String = {
     s"""
-      | return $inVarName
+      | return $inVarName.collectNoExecute()
       """.stripMargin
   }
 

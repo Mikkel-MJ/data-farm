@@ -11,7 +11,7 @@ case class PartsuppOperatorManager() extends AbstractTableOperatorManager{
 
   val tableName = "partsupp"
 
-  val wayangName = "Partsupp"
+  val wayangName = "PartSupplier"
 
   //override val tableCardinality: Int = 800000
 
