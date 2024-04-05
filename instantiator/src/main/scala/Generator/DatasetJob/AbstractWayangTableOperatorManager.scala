@@ -27,7 +27,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
   override def buildDataSourceCode(schema: String, tableName: String, outVarName: String, delimiter:String = "|"): String = {
     s"""
     | val $outVarName = planBuilder
-    | .readTextFile(datapath + "$tableName")
+    | .readTextFile(datapath + "$tableName.tbl")
     | .withName("Read $wayangName")
     | .map($wayangName.parseCsv)
     | .map($wayangName.toTuple)

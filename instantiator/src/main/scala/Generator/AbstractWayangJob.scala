@@ -93,7 +93,7 @@ object AbstractWayangJob {
   | import org.apache.wayang.api._
   | import org.apache.wayang.core.api.{Configuration, WayangContext}
   | import org.apache.wayang.core.plugin.Plugin
-  | import org.apache.wayang.apps.tpch.data.{Customer, Order, LineItem, Nation, Part, Partsupp, Supplier} 
+  | import org.apache.wayang.apps.tpch.data.{Customer, Order, LineItem, Nation, Part, PartSupplier, Supplier} 
   | import org.apache.wayang.core.plugin.Plugin
   | import java.sql.Date
   | import org.apache.wayang.apps.util.{ExperimentDescriptor, Parameters, ProfileDBHelper}
