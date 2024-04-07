@@ -93,13 +93,15 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
     val complexity = seed % 3
     val c = complexity match {
       case 0 => s"""
-                   |val $outVarName = $inVarName.map(x=>x)
+                   |val $outVarName = $inVarName.map(x=>x).withUdfComplexity(UDFComplexity.LINEAR)
                 """.stripMargin
       case 1 => s"""
                    |val $outVarName = $inVarName.map(x=> {var count = 0; for (v <- x.productIterator) count+=1; x})
+                   |                  .withUdfComplexity(UDFComplexity.QUADRATIC)
                 """.stripMargin
       case 2 => s"""
                    |val $outVarName = $inVarName.map(x=> {var count = 0; for (v1 <- x.productIterator; v2 <- x.productIterator) count+=1; x})
+                   |                  .withUdfComplexity(UDFComplexity.SUPERQUADRATIC)
        """.stripMargin
     }
     (c, complexity)

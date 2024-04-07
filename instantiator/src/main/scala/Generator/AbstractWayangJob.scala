@@ -100,6 +100,7 @@ object AbstractWayangJob {
   | import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
   | import org.apache.wayang.apps.tpch.CsvUtils
   | import org.apache.wayang.ml.training.GeneratableJob
+  | import org.apache.wayang.core.function.UDFComplexity
   |
   | class //#job_name#// extends GeneratableJob {
   |
