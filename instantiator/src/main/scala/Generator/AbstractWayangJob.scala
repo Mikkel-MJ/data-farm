@@ -109,7 +109,7 @@ object AbstractWayangJob {
   |
   | val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
   | val plugins = Parameters.loadPlugins(args(0))
-  | val datapath ="file:///var/www/html/data/" 
+  | val datapath = args(1) 
   |
   | implicit val configuration = new Configuration
   | val wayangCtx = new WayangContext(configuration)
