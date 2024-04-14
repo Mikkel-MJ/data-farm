@@ -68,7 +68,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def buildSortPartitionCode(inVarName: String, outVarName: String, sortField: String, order: String = "ASCENDING"): String = {
     s"""
-       |val $outVarName = $inVarName.sort[Long](_._$sortField)
+       |val $outVarName = $inVarName.sort[Double](_._$sortField)
       """.stripMargin
   }
 
@@ -113,7 +113,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def partitionCode(inVarName: String, outVarName: String): String = {
     s"""
-       |val $outVarName = $inVarName.partitionByHash(0)
+      |val $outVarName = $inVarName.mapPartitions(x=>x)
       """.stripMargin
 
   }
@@ -143,7 +143,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def sortPartitionCode(inVarName: String, outVarName: String, seed: Int): String = {
     val sField = getElementBySeed(fields.keys.toSeq, seed).toString
-    val sFieldId = fields(sField).toInt - 1
+    val sFieldId = fields(sField).toInt
     buildSortPartitionCode(inVarName, outVarName, sFieldId.toString)
   }
 

@@ -18,7 +18,7 @@ class CONFIG:
     DATA_ID = "1GB"
 
     # Job generator conf
-    N_JOBS = 20
+    N_JOBS = 1
     N_VERSIONS = 1
     JOB_SEED = 42  # -1 | 0
     DATA_MANAGER = "TPCH"  # "TPCH" | "IMDB"
