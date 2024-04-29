@@ -68,7 +68,7 @@ trait AbstractWayangTableOperatorManager extends AbstractTableOperatorManager {
 
   override def buildSortPartitionCode(inVarName: String, outVarName: String, sortField: String, order: String = "ASCENDING"): String = {
     s"""
-       |val $outVarName = $inVarName.sort[Double](_._$sortField)
+       |val $outVarName = $inVarName.sort(_._$sortField)
       """.stripMargin
   }
 
